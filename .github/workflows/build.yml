@@ -29,7 +29,7 @@ jobs:
           flet build windows
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Flet_App_Windows
           path: build/
