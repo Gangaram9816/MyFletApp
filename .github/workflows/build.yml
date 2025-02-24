@@ -25,9 +25,9 @@ jobs:
       - name: Install Flutter
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1 C:\flutter
-          echo "C:\flutter\bin" >> $env:GITHUB_PATH  # Add Flutter to system PATH
-          echo "C:\flutter\bin\cache\dart-sdk\bin" >> $env:GITHUB_PATH  # Add Dart to system PATH
-          refreshenv  # Force PATH refresh (fixes "command not found")
+          echo "C:\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
+          echo "C:\flutter\bin\cache\dart-sdk\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Manually update PATH
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
         shell: pwsh
