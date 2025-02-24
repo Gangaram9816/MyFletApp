@@ -1,0 +1,35 @@
+name: Build & Deploy
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Install dependencies
+        run: pip install -r src/requirements.txt
+      - name: Build Windows App
+        run: flet build windows
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: MyFletApp-windows
+          path: build/
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/*
+          token: ${{ secrets.GITHUB_TOKEN }}
