@@ -57,7 +57,8 @@ jobs:
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
 
           # ✅ Ensure output directory exists
-          mkdir build/windows -Force
+          #mkdir build/windows -Force
+          mkdir ..\build -Force
 
           # ✅ Move into the 'src' folder before running Flet build
           cd src
@@ -65,17 +66,17 @@ jobs:
           echo "Listing files before build:"
           Get-ChildItem
 
-          flet build windows --module-name main --output ../build/windows/ --verbose  # ✅ Adjusted module-name
-
-          echo "Listing build folder after build:"
-          Get-ChildItem ../build/windows/
+          flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
+          cd ..
+          echo "Listing build folder after build content:"
+          Get-ChildItem
         shell: pwsh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Flet_App_Windows
-          path: build/
+          path: build/*
 
   release:
     needs: build
@@ -90,7 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Flet_App_Windows
-          path: build/windows/
+          path: build/
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
