@@ -40,13 +40,20 @@ LATEST_RELEASE_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/lates
 
 def check_for_updates():
     try:
-        response = requests.get(LATEST_RELEASE_URL).json()
-        latest_version = response["tag_name"]
+        response = requests.get(LATEST_RELEASE_URL)
+        response.raise_for_status()  # Raise an error for bad responses
+        data = response.json()
+
+        # Ensure "tag_name" exists in the response
+        latest_version = data.get("tag_name", "Unknown")
+        if latest_version == "Unknown":
+            return "No releases found. Please check manually."
+
         if latest_version > VERSION:
             return f"New version {latest_version} available! Download: https://github.com/{GITHUB_REPO}/releases/latest"
         else:
             return "You're up to date!"
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         return f"Error checking updates: {str(e)}"
 
 def main(page: ft.Page):
