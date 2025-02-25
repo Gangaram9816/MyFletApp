@@ -52,10 +52,10 @@ jobs:
           chcp 65001  # ✅ Fix Unicode Issue
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
-          [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8  # ✅ Fixes Unicode output in PowerShell
+          [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          flet build windows --module-name src.main
+          flet build windows --module-name src.main  # ✅ Use correct path to main.py
         shell: pwsh
 
       - name: Upload Artifact
