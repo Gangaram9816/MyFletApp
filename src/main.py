@@ -53,4 +53,8 @@ def main(page: ft.Page):
     update_message = check_for_updates()
     page.add(ft.Text(update_message, color="red" if "New version" in update_message else "green"))
 
-ft.app(target=main)
+
+if __name__ == "__main__":
+    ft.app(target=main)
+
+# ft.app(target=main)
