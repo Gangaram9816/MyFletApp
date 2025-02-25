@@ -49,34 +49,53 @@ jobs:
 
       - name: Build Windows Executable
         run: |
-          chcp 65001  # ✅ Fix Unicode Issue
+          hcp 65001  # ✅ Fix Unicode Issue
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          
-          # Build the app
-          flet build windows --module-name main --verbose
-          
-          # Move the output to the build folder
-          mkdir -p build
+
+          # ✅ Ensure the `build/` folder is empty before starting
+          if (Test-Path build) { Remove-Item -Recurse -Force build }
+
+          # ✅ Build the app specifying the correct module name (inside `src/`)
+          flet build windows --module-name src.main --verbose
+
+          # ✅ Ensure the built files are inside `build/`
+          mkdir build
           mv dist/* build/
+          # chcp 65001  # ✅ Fix Unicode Issue
+          # $env:PYTHONIOENCODING="utf-8"
+          # $env:PYTHONUTF8=1
+          # [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          # $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
+          # C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
+          
+          # # ✅ Ensure the `build/` folder is empty before starting
+          # if (Test-Path build) { Remove-Item -Recurse -Force build }
 
-          # ✅ Ensure output directory exists
-          #mkdir build/windows -Force
-          #mkdir ..\build -Force
+          # # Build the app
+          # flet build windows --module-name src.main --verbose
+          
+          # # Move the output to the build folder
+          # mkdir -p build
+          # mv dist/* build/
 
-          # ✅ Move into the 'src' folder before running Flet build
-          #cd src
-          #echo "Current Directory: $(Get-Location)"  # ✅ Debugging log
-          #echo "Listing files before build:"
-          #Get-ChildItem
+          # # ✅ Ensure output directory exists
+          # #mkdir build/windows -Force
+          # #mkdir ..\build -Force
 
-          flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
-          #cd ..
-          #echo "Listing build folder after build content:"
-          #Get-ChildItem
+          # # ✅ Move into the 'src' folder before running Flet build
+          # #cd src
+          # #echo "Current Directory: $(Get-Location)"  # ✅ Debugging log
+          # #echo "Listing files before build:"
+          # #Get-ChildItem
+
+          # #flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
+          # #cd ..
+          # #echo "Listing build folder after build content:"
+          # #Get-ChildItem
         shell: pwsh
 
       - name: List build directory contents
