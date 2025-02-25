@@ -55,7 +55,8 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          flet build windows --module-name src.main  # ✅ Use correct path to main.py
+          python -m src.main  # ✅ Test if Python detects src.main
+          flet build windows --module-name src.main --output build/  # ✅ Ensure correct path to main.py
         shell: pwsh
 
       - name: Upload Artifact
