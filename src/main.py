@@ -54,13 +54,20 @@ def main(page: ft.Page):
     page.add(ft.Text(update_message, color="red" if "New version" in update_message else "green"))
 
 
-
-if os.getenv("CI"):  
-    print("✅ Running in CI/CD, skipping Flet UI launch.")
-else:
-    ft.app(target=main)
-    
 if __name__ == "__main__":
-    ft.app(target=main)
+    if "CI" in os.environ:  # ✅ Skip UI in CI/CD mode
+        print("✅ Running in CI/CD mode, exiting immediately.")
+        exit(0)  # ✅ Prevent blocking execution
+    else:
+        ft.app(target=main)
+
+
+# if os.getenv("CI"):  
+#     print("✅ Running in CI/CD, skipping Flet UI launch.")
+# else:
+#     ft.app(target=main)
+
+# if __name__ == "__main__":
+#     ft.app(target=main)
 
 # ft.app(target=main)
