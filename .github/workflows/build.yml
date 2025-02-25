@@ -48,7 +48,11 @@ jobs:
           pip install flet  # Ensure Flet CLI is installed
 
       - name: Build Windows Executable
-        run: flet build windows
+        run: |
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
+          C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
+          flet build windows
+        shell: pwsh
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
