@@ -19,7 +19,9 @@ jobs:
       - name: Set UTF-8 Encoding (Fix Unicode Issue)
         run: |
           chcp 65001
+          $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
+          [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         shell: pwsh
 
       - name: Install Flutter
@@ -27,9 +29,11 @@ jobs:
           git clone https://github.com/flutter/flutter.git --depth 1 C:\flutter
           echo "C:\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
           echo "C:\flutter\bin\cache\dart-sdk\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
-          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Manually update PATH
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
+          [System.Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::Machine)
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
+          C:\flutter\bin\flutter precache  # ✅ Ensures Flutter dependencies are installed
         shell: pwsh
 
       - name: Set up Python
