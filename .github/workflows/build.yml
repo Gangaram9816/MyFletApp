@@ -55,8 +55,13 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          $env:CI="true"  # ✅ Set CI environment variable
-          flet build windows --module-name src.main --output build/ --verbose  # ✅ Build without running UI
+
+          # ✅ Force Python to recognize src/ as a package
+          $env:PYTHONPATH="src"  # ✅ Adds src/ to Python path
+          python -c "import sys; print('✅ Python Path:', sys.path)"  # ✅ Debugging
+          python -c "import importlib.util; print('✅ src.main Exists:', importlib.util.find_spec('src.main') is not None)"  # ✅ Debugging
+
+          flet build windows --module-name src.main --output build/ --verbose  # ✅ Build using correct module
         shell: pwsh
 
       - name: Upload Artifact
