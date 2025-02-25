@@ -55,9 +55,8 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          $env:CI="true"  # ✅ Tell the script it's running in CI/CD mode (PowerShell syntax)
-          python -m src.main  # ✅ Now it should exit instead of blocking
-          flet build windows --module-name src.main --output build/ --verbose  # ✅ Use correct module
+          $env:CI="true"  # ✅ Set CI environment variable
+          flet build windows --module-name src.main --output build/ --verbose  # ✅ Build without running UI
         shell: pwsh
 
       - name: Upload Artifact
