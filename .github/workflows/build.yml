@@ -56,12 +56,9 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
 
-          # ✅ Force Python to recognize src/ as a package
-          $env:PYTHONPATH="src"  # ✅ Adds src/ to Python path
-          python -c "import sys; print('✅ Python Path:', sys.path)"  # ✅ Debugging
-          python -c "import importlib.util; print('✅ src.main Exists:', importlib.util.find_spec('src.main') is not None)"  # ✅ Debugging
-
-          flet build windows --module-name src.main --output build/ --verbose  # ✅ Build using correct module
+          # ✅ Move into the 'src' folder before running Flet build
+          cd src
+          flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
         shell: pwsh
 
       - name: Upload Artifact
