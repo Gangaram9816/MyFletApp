@@ -31,7 +31,7 @@
 
 import flet as ft
 import requests
-
+import os
 VERSION = "1.0.0"
 GITHUB_REPO = "Gangaram9816/MyFletApp"
 LATEST_RELEASE_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
@@ -54,6 +54,12 @@ def main(page: ft.Page):
     page.add(ft.Text(update_message, color="red" if "New version" in update_message else "green"))
 
 
+
+if os.getenv("CI"):  
+    print("✅ Running in CI/CD, skipping Flet UI launch.")
+else:
+    ft.app(target=main)
+    
 if __name__ == "__main__":
     ft.app(target=main)
 
