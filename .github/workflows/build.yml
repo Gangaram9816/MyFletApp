@@ -56,89 +56,35 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
 
-          mkdir build -ErrorAction SilentlyContinue 
-
+          # ✅ Move into the 'src' folder before running Flet build
           cd src
-
-          flet build windows --module-name main --output ../build/ --verbose  
-          # ✅ Ensure the `build/` folder is empty before starting
-          # if (Test-Path build) { Remove-Item -Recurse -Force build }
-
-          # ✅ Build the app specifying the correct module name (inside `src/`)
-          # flet build windows --module-name main --verbose
-          cd ..
-
-          echo "Build complete, moving to build directory..."
-          # ✅ Ensure the built files are inside `build/`
-          if (Test-Path -Path "build") {
-              Write-Output "Build directory exists, proceeding..."
-          } else {
-              Write-Output "ERROR: Build directory does not exist!"
-              exit 1
-          }
-          # if (Test-Path "build") {
-          #     echo "✅ Build folder found!"
-          # } else {
-          #     echo "❌ Error: No 'build' folder found after build."
-          #     exit 1
-          # }
-          # if (Test-Path src/dist) {
-          #   mv src/dist/* build/
-          # } elseif (Test-Path dist) {
-          #   mv dist/* build/
-          # } else {
-          #   echo "Error: No 'dist' folder found after build."
-          #   exit 1
-          # }
-          # mkdir build
-          # mv dist/* build/
-          # chcp 65001  # ✅ Fix Unicode Issue
-          # $env:PYTHONIOENCODING="utf-8"
-          # $env:PYTHONUTF8=1
-          # [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          # $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
-          # C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          
-          # # ✅ Ensure the `build/` folder is empty before starting
-          # if (Test-Path build) { Remove-Item -Recurse -Force build }
-
-          # # Build the app
-          # flet build windows --module-name src.main --verbose
-          
-          # # Move the output to the build folder
-          # mkdir -p build
-          # mv dist/* build/
-
-          # # ✅ Ensure output directory exists
-          # #mkdir build/windows -Force
-          # #mkdir ..\build -Force
-
-          # # ✅ Move into the 'src' folder before running Flet build
-          # #cd src
-          # #echo "Current Directory: $(Get-Location)"  # ✅ Debugging log
-          # #echo "Listing files before build:"
-          # #Get-ChildItem
-
-          # #flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
-          # #cd ..
-          # #echo "Listing build folder after build content:"
-          # #Get-ChildItem
+          flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
         shell: pwsh
-      - name: Verify Build Output
-        run: |
-          ls build/
-        shell: pwsh
-        
-      # - name: List build directory contents
-      #   run: ls -R build
-      #   shell: bash
 
-      - name: Upload Artifact
+      - name: Upload Built App
         uses: actions/upload-artifact@v4
         with:
           name: Flet_App_Windows
           path: build/
-          retention-days: 7
+
+      # ✅ Install Inno Setup for making an installer
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup -y
+        shell: pwsh
+
+      # ✅ Generate Windows Installer using Inno Setup
+      - name: Generate Windows Installer
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+        shell: pwsh
+
+      # ✅ Upload the Installer as an Artifact
+      - name: Upload Windows Installer as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows_Installer
+          path: MyFletApp_Installer.exe
 
   release:
     needs: build
@@ -155,8 +101,14 @@ jobs:
           name: Flet_App_Windows
           path: build/
 
+      - name: Download Windows Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows_Installer
+          path: build/
+
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: build/**.exe
+          files: build/*
           token: ${{ secrets.GITHUB_TOKEN }}
