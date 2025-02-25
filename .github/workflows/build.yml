@@ -55,28 +55,40 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
+          
+          # Build the app
+          flet build windows --module-name main --verbose
+          
+          # Move the output to the build folder
+          mkdir -p build
+          mv dist/* build/
 
           # ✅ Ensure output directory exists
           #mkdir build/windows -Force
-          mkdir ..\build -Force
+          #mkdir ..\build -Force
 
           # ✅ Move into the 'src' folder before running Flet build
-          cd src
-          echo "Current Directory: $(Get-Location)"  # ✅ Debugging log
-          echo "Listing files before build:"
-          Get-ChildItem
+          #cd src
+          #echo "Current Directory: $(Get-Location)"  # ✅ Debugging log
+          #echo "Listing files before build:"
+          #Get-ChildItem
 
           flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
-          cd ..
-          echo "Listing build folder after build content:"
-          Get-ChildItem
+          #cd ..
+          #echo "Listing build folder after build content:"
+          #Get-ChildItem
         shell: pwsh
+
+      - name: List build directory contents
+        run: ls -R build
+        shell: bash
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Flet_App_Windows
-          path: build/*
+          path: build/**
+          retention-days: 7
 
   release:
     needs: build
@@ -96,5 +108,5 @@ jobs:
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: build/windows/*.exe
+          files: build/**.exe
           token: ${{ secrets.GITHUB_TOKEN }}
