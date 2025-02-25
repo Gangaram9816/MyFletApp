@@ -49,7 +49,7 @@ jobs:
 
       - name: Build Windows Executable
         run: |
-          hcp 65001  # ✅ Fix Unicode Issue
+          chcp 65001  # ✅ Fix Unicode Issue
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
