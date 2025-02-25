@@ -41,13 +41,14 @@ LATEST_RELEASE_URL = f"https://api.github.com/repos/{GITHUB_REPO}/releases/lates
 def check_for_updates():
     try:
         response = requests.get(LATEST_RELEASE_URL)
+        if response.status_code == 404:
+            return "No releases found. Please check manually."
+
         response.raise_for_status()  # Raise an error for bad responses
         data = response.json()
-
-        # Ensure "tag_name" exists in the response
         latest_version = data.get("tag_name", "Unknown")
         if latest_version == "Unknown":
-            return "No releases found. Please check manually."
+            return "No valid release found."
 
         if latest_version > VERSION:
             return f"New version {latest_version} available! Download: https://github.com/{GITHUB_REPO}/releases/latest"
@@ -57,8 +58,26 @@ def check_for_updates():
         return f"Error checking updates: {str(e)}"
 
 def main(page: ft.Page):
-    update_message = check_for_updates()
-    page.add(ft.Text(update_message, color="red" if "New version" in update_message else "green"))
+    page.title = "Simple Flet Desktop App"
+    
+    # Input field
+    user_input = ft.TextField(label="Enter something")
+    
+    # Display text
+    display_text = ft.Text("", size=20)
+    
+    # Function to update text on button click
+    def on_click(e):
+        display_text.value = f"You entered: {user_input.value}"
+        page.update()
+    
+    # Button
+    submit_button = ft.ElevatedButton(text="Submit", on_click=on_click)
+    
+    # Add UI elements to the page
+    page.add(user_input, submit_button, display_text)
+    # update_message = check_for_updates()
+    # page.add(ft.Text(update_message, color="red" if "New version" in update_message else "green"))
 
 
 if __name__ == "__main__":
