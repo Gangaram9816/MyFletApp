@@ -63,8 +63,16 @@ jobs:
           flet build windows --module-name src.main --verbose
 
           # ✅ Ensure the built files are inside `build/`
-          mkdir build
-          mv dist/* build/
+          if (Test-Path src/dist) {
+            mv src/dist/* build/
+          } elseif (Test-Path dist) {
+            mv dist/* build/
+          } else {
+            echo "Error: No 'dist' folder found after build."
+            exit 1
+          }
+          # mkdir build
+          # mv dist/* build/
           # chcp 65001  # ✅ Fix Unicode Issue
           # $env:PYTHONIOENCODING="utf-8"
           # $env:PYTHONUTF8=1
