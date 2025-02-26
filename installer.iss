@@ -1,4 +1,3 @@
-
 [Setup]
 AppName=MyFletApp
 AppVersion=1.0.0
@@ -9,11 +8,11 @@ DefaultGroupName=MyFletApp
 UninstallDisplayIcon={app}\src.exe
 Compression=lzma
 SolidCompression=yes
-OutputDir=build  ; ✅ Ensure the installer is placed in the "build" folder
-OutputBaseFilename=MyFletApp_Installer  ; ✅ Name of the output installer file
-SetupIconFile=build\app.ico  ; ✅ Custom icon for the installer (optional)
-ArchitecturesInstallIn64BitMode=x64  ; ✅ Ensure correct 64-bit installation
-DisableDirPage=no  ; ✅ Allow user to choose installation directory
+OutputDir=build  
+OutputBaseFilename=MyFletApp_Installer  
+SetupIconFile=build\app.ico  
+ArchitecturesInstallIn64BitMode=x64  
+DisableDirPage=no 
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
