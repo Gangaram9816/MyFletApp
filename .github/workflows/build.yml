@@ -104,14 +104,28 @@ jobs:
 
       - name: Generate Windows Installer
         run: |
-          $VERSION="${{ github.ref_name }}"
-          if (Test-Path "build/MyFletApp_$VERSION.exe") {
-              echo "✅ EXE found. Proceeding with installer..."
-              & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          # Extract version from the GitHub tag or default to "main"
+          if ($env:GITHUB_REF -match 'refs/tags/v(.+)') {
+            $VERSION=$matches[1]
           } else {
-              echo "❌ ERROR: Executable not found! Stopping installer generation."
-              exit 1
+            $VERSION="main"
           }
+
+          echo "Setting VERSION=$VERSION"
+
+          # Ensure EXE exists and rename it to match versioning
+          if (Test-Path "build/src.exe") {
+            echo "✅ src.exe found. Renaming to MyFletApp_$VERSION.exe..."
+            mv build/src.exe build/MyFletApp_$VERSION.exe
+          } else {
+            echo "❌ ERROR: src.exe not found! Stopping build."
+            exit 1
+          }
+
+          # Pass version to Inno Setup and generate installer
+          echo "Running Inno Setup Compiler with VERSION=$VERSION"
+          $env:VERSION=$VERSION
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
 
       - name: Upload Windows Installer as Artifact
