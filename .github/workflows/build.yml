@@ -30,7 +30,6 @@ jobs:
           echo "C:\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
           echo "C:\flutter\bin\cache\dart-sdk\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
-          [System.Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::Machine)
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
           C:\flutter\bin\flutter precache
@@ -55,9 +54,8 @@ jobs:
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
-          C:\flutter\bin\flutter doctor
-          
-          # Build the application
+
+          # Run Flet build
           cd src
           flet build windows --module-name main --output ../build/ --verbose
         shell: pwsh
@@ -69,8 +67,7 @@ jobs:
         shell: pwsh
 
       - name: Install Inno Setup
-        run: |
-          choco install innosetup -y
+        run: choco install innosetup -y
         shell: pwsh
 
       - name: Generate Windows Installer
@@ -78,12 +75,11 @@ jobs:
           echo "Checking contents of build directory before running ISCC:"
           ls build/
 
-          # Ensure all required files exist before running ISCC
           if (-Not (Test-Path "build/src.exe")) { 
             Write-Error "Error: src.exe not found in build/"; exit 1 
           }
 
-          # Run Inno Setup Compiler
+          # Run Inno Setup to generate installer
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
 
@@ -91,25 +87,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows_Installer
-          path: MyFletApp_Installer.exe
-
-  release:
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Download Build Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: Windows_Installer
-          path: MyFletApp_Installer.exe
-
-      - name: Upload to GitHub Releases
-        uses: softprops/action-gh-release@v1
-        with:
-          files: MyFletApp_Installer.exe
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: build/MyFletApp_Installer.exe
