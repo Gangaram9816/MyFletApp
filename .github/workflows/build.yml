@@ -44,34 +44,44 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-          pip install flet
-        shell: pwsh
+          pip install flet  # Ensure Flet CLI is installed
 
       - name: Build Windows Executable
         run: |
-          chcp 65001
+          chcp 65001  # ✅ Fix Unicode Issue
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
           C:\flutter\bin\flutter doctor
 
-          cd src  
+          echo "✅ Running Flet build..."
+          cd src  # ✅ Move inside the "src" directory where `main.py` exists
           flet build windows --module-name main --output ../build/ --verbose
-
-          # Ensure src.exe exists before renaming
-          $VERSION="${{ github.ref_name }}"
-          if (Test-Path "../build/src.exe") {
-              echo "✅ src.exe found. Renaming..."
-              mv ../build/src.exe ../build/MyFletApp_$VERSION.exe
-          } else {
-              echo "❌ ERROR: src.exe not found! Build failed."
-              exit 1
-          }
         shell: pwsh
 
-      - name: Verify Build Directory
-        run: ls build/
+      - name: Verify Build Output
+        run: |
+          echo "Checking contents of the build directory after Flet build..."
+          ls -R build/
+        shell: pwsh
+
+      - name: Rename EXE for Versioning
+        run: |
+          if ($env:GITHUB_REF -match 'refs/tags/v(.+)') {
+            $VERSION=$matches[1]
+          } else {
+            $VERSION="main"
+          }
+          echo "Setting VERSION=$VERSION"
+
+          if (Test-Path "build/src.exe") {
+            echo "✅ src.exe found. Renaming to MyFletApp_$VERSION.exe..."
+            mv build/src.exe build/MyFletApp_$VERSION.exe
+          } else {
+            echo "❌ ERROR: src.exe not found! Stopping build."
+            exit 1
+          }
         shell: pwsh
 
       - name: Upload Build Artifact
@@ -95,7 +105,8 @@ jobs:
           path: build/
 
       - name: Install Inno Setup
-        run: choco install innosetup -y
+        run: |
+          choco install innosetup -y
         shell: pwsh
 
       - name: Check Build Directory Before Running ISCC
@@ -104,36 +115,27 @@ jobs:
 
       - name: Generate Windows Installer
         run: |
-          # Extract version from the GitHub tag or default to "main"
           if ($env:GITHUB_REF -match 'refs/tags/v(.+)') {
             $VERSION=$matches[1]
           } else {
             $VERSION="main"
           }
-
           echo "Setting VERSION=$VERSION"
 
-          # Ensure EXE exists and rename it to match versioning
-          if (Test-Path "build/src.exe") {
-            echo "✅ src.exe found. Renaming to MyFletApp_$VERSION.exe..."
-            mv build/src.exe build/MyFletApp_$VERSION.exe
+          if (Test-Path "build/MyFletApp_$VERSION.exe") {
+            echo "✅ EXE found. Proceeding with installer..."
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           } else {
-            echo "❌ ERROR: src.exe not found! Stopping build."
+            echo "❌ ERROR: MyFletApp_$VERSION.exe not found! Stopping build."
             exit 1
           }
-
-          # Pass version to Inno Setup and generate installer
-          echo "Running Inno Setup Compiler with VERSION=$VERSION"
-          $env:VERSION=$VERSION
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
 
       - name: Upload Windows Installer as Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Windows_Installer
-          path: build/MyFletApp_Installer_$VERSION.exe
-          retention-days: 30
+          path: build/MyFletApp_Installer.exe
 
   release:
     needs: installer
@@ -153,5 +155,5 @@ jobs:
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: build/MyFletApp_Installer_${{ github.ref_name }}.exe
+          files: build/MyFletApp_Installer.exe
           token: ${{ secrets.GITHUB_TOKEN }}
