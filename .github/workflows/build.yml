@@ -56,23 +56,14 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
 
-          # ✅ Move into the 'src' folder before running Flet build
+          # ✅ Build the Flet app correctly
           cd src
-          flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
+          flet build windows --module-name main --output ../build/ --verbose
         shell: pwsh
 
-      - name: Move Build Files to Build Directory
+      - name: Verify Build Output
         run: |
-          echo "Contents of build directory BEFORE moving files:"
-          ls build/
-
-          # Ensure build folder exists
-          mkdir -Force build
-
-          # Move built files
-          mv src/build/windows/x64/runner/Release/* build/
-
-          echo "Contents of build directory AFTER moving files:"
+          echo "Verifying build directory contents..."
           ls build/
         shell: pwsh
 
