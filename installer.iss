@@ -1,4 +1,3 @@
-; MyFletApp Inno Setup Script
 
 [Setup]
 AppName=MyFletApp

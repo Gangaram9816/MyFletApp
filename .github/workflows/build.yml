@@ -84,13 +84,17 @@ jobs:
           name: Flet_App_Windows
           path: build/
 
-      - name: Verify Build Files Before Running Installer
-        run: ls build/
-        shell: pwsh
+      # - name: Verify Build Files Before Running Installer
+      #   run: ls build/
+      #   shell: pwsh
 
       - name: Install Inno Setup
         run: |
           choco install innosetup -y
+        shell: pwsh
+
+      - name: Check Build Directory Before Running ISCC
+        run: ls build/
         shell: pwsh
 
       - name: Generate Windows Installer
