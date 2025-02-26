@@ -32,7 +32,7 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
-          C:\flutter\bin\flutter precache  # ✅ Ensures Flutter dependencies are installed
+          C:\flutter\bin\flutter precache
         shell: pwsh
 
       - name: Set up Python
@@ -44,24 +44,29 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-          pip install flet  # Ensure Flet CLI is installed
+          pip install flet
+        shell: pwsh
 
       - name: Build Windows Executable
         run: |
-          chcp 65001  # ✅ Fix Unicode Issue
+          chcp 65001
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
-          C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          
-          # ✅ Move inside the "src" directory and build
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
+          C:\flutter\bin\flutter doctor
+
           cd src  
           flet build windows --module-name main --output ../build/ --verbose
 
-          # ✅ Rename src.exe with versioning (from Git tag)
-          $VERSION="${{ github.ref_name }}"
-          mv ../build/src.exe ../build/MyFletApp_${VERSION}.exe
+          # Ensure src.exe exists before renaming
+          if (Test-Path "../build/src.exe") {
+              echo "✅ Found src.exe. Renaming..."
+              mv ../build/src.exe ../build/MyFletApp_${{ github.ref_name }}.exe
+          } else {
+              echo "❌ ERROR: src.exe not found! Build failed."
+              exit 1
+          }
         shell: pwsh
 
       - name: Verify Build Directory
@@ -89,8 +94,7 @@ jobs:
           path: build/
 
       - name: Install Inno Setup
-        run: |
-          choco install innosetup -y
+        run: choco install innosetup -y
         shell: pwsh
 
       - name: Check Build Directory Before Running ISCC
@@ -101,11 +105,11 @@ jobs:
         run: |
           $VERSION="${{ github.ref_name }}"
           if (Test-Path "build/MyFletApp_${VERSION}.exe") {
-            echo "✅ EXE found. Proceeding with installer..."
-            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+              echo "✅ EXE found. Proceeding with installer..."
+              & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           } else {
-            echo "❌ ERROR: Executable not found! Stopping installer generation."
-            exit 1
+              echo "❌ ERROR: Executable not found! Stopping installer generation."
+              exit 1
           }
         shell: pwsh
 
@@ -114,7 +118,7 @@ jobs:
         with:
           name: Windows_Installer
           path: build/MyFletApp_Installer_${{ github.ref_name }}.exe
-          retention-days: 30  # ✅ Keep old versions for 30 days
+          retention-days: 30
 
   release:
     needs: installer
