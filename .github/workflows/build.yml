@@ -45,25 +45,26 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-          pip install flet  # Ensure Flet CLI is installed
+          pip install flet
+        shell: pwsh
 
       - name: Build Windows Executable
         run: |
-          chcp 65001  # ✅ Fix Unicode Issue
+          chcp 65001
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
-          C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-
-          # ✅ Build the Flet app correctly
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
+          C:\flutter\bin\flutter doctor
+          
+          # Build the application
           cd src
           flet build windows --module-name main --output ../build/ --verbose
         shell: pwsh
 
       - name: Verify Build Output
         run: |
-          echo "Verifying build directory contents..."
+          echo "Checking contents of build directory..."
           ls build/
         shell: pwsh
 
@@ -74,18 +75,17 @@ jobs:
 
       - name: Generate Windows Installer
         run: |
-          echo "Verifying build folder contents before running ISCC:"
-          ls build/  # ✅ Debugging step
+          echo "Checking contents of build directory before running ISCC:"
+          ls build/
 
-          # ✅ Ensure installer file paths are correctly referenced
+          # Ensure all required files exist before running ISCC
+          if (-Not (Test-Path "build/src.exe")) { 
+            Write-Error "Error: src.exe not found in build/"; exit 1 
+          }
+
+          # Run Inno Setup Compiler
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
-
-      - name: Upload Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Flet_App_Windows
-          path: build/
 
       - name: Upload Windows Installer as Artifact
         uses: actions/upload-artifact@v4
@@ -105,11 +105,11 @@ jobs:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: Flet_App_Windows
-          path: build/
+          name: Windows_Installer
+          path: MyFletApp_Installer.exe
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
         with:
-          files: build/*
+          files: MyFletApp_Installer.exe
           token: ${{ secrets.GITHUB_TOKEN }}
