@@ -60,9 +60,10 @@ jobs:
           flet build windows --module-name main --output ../build/ --verbose
 
           # Ensure src.exe exists before renaming
+          $VERSION="${{ github.ref_name }}"
           if (Test-Path "../build/src.exe") {
-              echo "✅ Found src.exe. Renaming..."
-              mv ../build/src.exe ../build/MyFletApp_${{ github.ref_name }}.exe
+              echo "✅ src.exe found. Renaming..."
+              mv ../build/src.exe ../build/MyFletApp_$VERSION.exe
           } else {
               echo "❌ ERROR: src.exe not found! Build failed."
               exit 1
@@ -104,7 +105,7 @@ jobs:
       - name: Generate Windows Installer
         run: |
           $VERSION="${{ github.ref_name }}"
-          if (Test-Path "build/MyFletApp_${VERSION}.exe") {
+          if (Test-Path "build/MyFletApp_$VERSION.exe") {
               echo "✅ EXE found. Proceeding with installer..."
               & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           } else {
@@ -117,7 +118,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Windows_Installer
-          path: build/MyFletApp_Installer_${{ github.ref_name }}.exe
+          path: build/MyFletApp_Installer_$VERSION.exe
           retention-days: 30
 
   release:
