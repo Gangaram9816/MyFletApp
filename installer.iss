@@ -1,4 +1,3 @@
-; Inno Setup Script for Flet App Installer
 
 [Setup]
 AppName=MyFletApp

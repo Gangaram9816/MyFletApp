@@ -33,7 +33,7 @@ jobs:
           [System.Environment]::SetEnvironmentVariable("Path", $env:Path, [System.EnvironmentVariableTarget]::Machine)
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
-          C:\flutter\bin\flutter precache  # ✅ Ensures Flutter dependencies are installed
+          C:\flutter\bin\flutter precache
         shell: pwsh
 
       - name: Set up Python
@@ -61,25 +61,40 @@ jobs:
           flet build windows --module-name main --output ../build/ --verbose  # ✅ Adjusted module-name
         shell: pwsh
 
-      - name: Upload Built App
-        uses: actions/upload-artifact@v4
-        with:
-          name: Flet_App_Windows
-          path: build/
+      - name: Move Build Files to Build Directory
+        run: |
+          echo "Contents of build directory BEFORE moving files:"
+          ls build/
 
-      # ✅ Install Inno Setup for making an installer
+          # Ensure build folder exists
+          mkdir -Force build
+
+          # Move built files
+          mv src/build/windows/x64/runner/Release/* build/
+
+          echo "Contents of build directory AFTER moving files:"
+          ls build/
+        shell: pwsh
+
       - name: Install Inno Setup
         run: |
           choco install innosetup -y
         shell: pwsh
 
-      # ✅ Generate Windows Installer using Inno Setup
       - name: Generate Windows Installer
         run: |
+          echo "Verifying build folder contents before running ISCC:"
+          ls build/  # ✅ Debugging step
+
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
 
-      # ✅ Upload the Installer as an Artifact
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flet_App_Windows
+          path: build/
+
       - name: Upload Windows Installer as Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -99,12 +114,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Flet_App_Windows
-          path: build/
-
-      - name: Download Windows Installer
-        uses: actions/download-artifact@v4
-        with:
-          name: Windows_Installer
           path: build/
 
       - name: Upload to GitHub Releases
