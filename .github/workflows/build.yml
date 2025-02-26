@@ -99,7 +99,15 @@ jobs:
 
       - name: Generate Windows Installer
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+          if (Test-Path "build/src.exe") {
+            echo "✅ src.exe found. Proceeding with installer..."
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          } else {
+            echo "❌ ERROR: src.exe not found! Stopping build."
+            exit 1
+          }
+          # & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
 
       - name: Upload Windows Installer as Artifact

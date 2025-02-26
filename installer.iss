@@ -10,19 +10,19 @@ Compression=lzma
 SolidCompression=yes
 OutputDir=build  
 OutputBaseFilename=MyFletApp_Installer  
-SetupIconFile=build\app.ico  
-ArchitecturesInstallIn64BitMode=x64  
-DisableDirPage=no 
+ArchitecturesInstallIn64BitMode=x64
+DisableDirPage=no  
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
+Source: "build\src.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "build\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\MyFletApp"; Filename: "{app}\src.exe"; IconFilename: "{app}\app.ico"
-Name: "{commondesktop}\MyFletApp"; Filename: "{app}\src.exe"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
+Name: "{group}\MyFletApp"; Filename: "{app}\src.exe"
+Name: "{commondesktop}\MyFletApp"; Filename: "{app}\src.exe"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional tasks:"
