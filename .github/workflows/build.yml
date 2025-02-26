@@ -54,9 +54,10 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
           C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-
+          cd src  # ✅ Move inside the "src" directory
+          flet build windows --module-name main --output ../build/ --verbose
           # ✅ Build the Flet app into the "build" folder
-          flet build windows --module-name src.main --output build/ --verbose
+          # flet build windows --module-name src.main --output build/ --verbose
         shell: pwsh
 
       - name: Verify Build Directory
