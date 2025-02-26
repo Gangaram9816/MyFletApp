@@ -1,20 +1,15 @@
-
 [Setup]
 AppName=MyFletApp
 AppVersion=1.0.0
 DefaultDirName={autopf}\MyFletApp
 DefaultGroupName=MyFletApp
-OutputDir=.
 OutputBaseFilename=MyFletApp_Installer
-Compression=lzma2
+Compression=lzma
 SolidCompression=yes
-SetupIconFile=icon.ico
-UninstallDisplayIcon={app}\src.exe
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
 
 [Files]
-Source: "build\*"; DestDir: "{app}"; Flags: recursesubdirs
+Source: "build\src.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\*.*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\MyFletApp"; Filename: "{app}\src.exe"
