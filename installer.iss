@@ -1,6 +1,6 @@
 [Setup]
 AppName=MyFletApp
-AppVersion=1.0.0
+AppVersion=1.1.0  
 AppPublisher=YourName
 AppPublisherURL=https://github.com/Gangaram9816/MyFletApp
 DefaultDirName={pf}\MyFletApp
@@ -9,9 +9,9 @@ UninstallDisplayIcon={app}\src.exe
 Compression=lzma
 SolidCompression=yes
 OutputDir=build  
-OutputBaseFilename=MyFletApp_Installer  
+OutputBaseFilename=MyFletApp_Installer_v1.1.0  
 ArchitecturesInstallIn64BitMode=x64
-DisableDirPage=no  
+DisableDirPage=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
