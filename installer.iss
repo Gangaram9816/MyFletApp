@@ -13,7 +13,7 @@ SolidCompression=yes
 OutputDir=build  ; ✅ Ensure the installer is placed in the "build" folder
 OutputBaseFilename=MyFletApp_Installer  ; ✅ Name of the output installer file
 SetupIconFile=build\app.ico  ; ✅ Custom icon for the installer (optional)
-ArchitecturesInstallIn64BitMode=x64  ; ✅ Force 64-bit installation mode
+ArchitecturesInstallIn64BitMode=x64  ; ✅ Ensure correct 64-bit installation
 DisableDirPage=no  ; ✅ Allow user to choose installation directory
 
 [Languages]
@@ -34,4 +34,3 @@ Filename: "{app}\src.exe"; Description: "Launch MyFletApp"; Flags: nowait postin
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
-

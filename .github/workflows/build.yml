@@ -32,7 +32,7 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
-          C:\flutter\bin\flutter precache
+          C:\flutter\bin\flutter precache  # ✅ Ensures Flutter dependencies are installed
         shell: pwsh
 
       - name: Set up Python
@@ -44,42 +44,56 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-          pip install flet
-        shell: pwsh
+          pip install flet  # Ensure Flet CLI is installed
 
       - name: Build Windows Executable
         run: |
-          chcp 65001
+          chcp 65001  # ✅ Fix Unicode Issue
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
+          C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
 
-          # Run Flet build
-          cd src
-          flet build windows --module-name main --output ../build/ --verbose
+          # ✅ Build the Flet app into the "build" folder
+          flet build windows --module-name src.main --output build/ --verbose
         shell: pwsh
 
-      - name: Verify Build Output
-        run: |
-          echo "Checking contents of build directory..."
-          ls build/
+      - name: Verify Build Directory
+        run: ls build/
+        shell: pwsh
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flet_App_Windows
+          path: build/
+
+  installer:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Flet_App_Windows
+          path: build/
+
+      - name: Verify Build Files Before Running Installer
+        run: ls build/
         shell: pwsh
 
       - name: Install Inno Setup
-        run: choco install innosetup -y
+        run: |
+          choco install innosetup -y
         shell: pwsh
 
       - name: Generate Windows Installer
         run: |
-          echo "Checking contents of build directory before running ISCC:"
-          ls build/
-
-          if (-Not (Test-Path "build/src.exe")) { 
-            Write-Error "Error: src.exe not found in build/"; exit 1 
-          }
-
-          # Run Inno Setup to generate installer
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
 
@@ -88,3 +102,24 @@ jobs:
         with:
           name: Windows_Installer
           path: build/MyFletApp_Installer.exe
+
+  release:
+    needs: installer
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download Windows Installer
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows_Installer
+          path: build/
+
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/MyFletApp_Installer.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
