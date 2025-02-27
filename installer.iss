@@ -1,6 +1,6 @@
 [Setup]
 AppName=MyFletApp
-AppVersion={#VERSION} 
+AppVersion={#VERSION}
 AppPublisher=YourName
 AppPublisherURL=https://github.com/Gangaram9816/MyFletApp
 DefaultDirName={pf}\MyFletApp
@@ -8,9 +8,9 @@ DefaultGroupName=MyFletApp
 UninstallDisplayIcon={app}\MyFletApp_{#VERSION}.exe
 Compression=lzma
 SolidCompression=yes
-OutputDir=build
+OutputDir={#SourcePath}\build
 OutputBaseFilename=MyFletApp_Installer
-SetupIconFile=build\app.ico
+SetupIconFile={#SourcePath}\build\app.ico
 ArchitecturesInstallIn64BitMode=x64
 DisableDirPage=no
 
@@ -18,7 +18,7 @@ DisableDirPage=no
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "build\MyFletApp_{#VERSION}.exe"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+Source: "{#SourcePath}\build\src.exe"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\MyFletApp"; Filename: "{app}\MyFletApp_{#VERSION}.exe"; IconFilename: "{app}\app.ico"

@@ -121,15 +121,24 @@ jobs:
             $VERSION="main"
           }
           echo "Setting VERSION=$VERSION"
+          cd $GITHUB_WORKSPACE
 
-          if (Test-Path "build/MyFletApp_$VERSION.exe") {
-            echo "✅ EXE found. Proceeding with installer..."
-            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DVERSION=$VERSION installer.iss
-            #& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          if (Test-Path "build/src.exe") {
+            echo "✅ src.exe found. Proceeding with installer..."
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "$GITHUB_WORKSPACE/installer.iss"
           } else {
-            echo "❌ ERROR: MyFletApp_$VERSION.exe not found! Stopping build."
+            echo "❌ ERROR: src.exe not found! Stopping build."
             exit 1
           }
+
+          # if (Test-Path "build/MyFletApp_$VERSION.exe") {
+          #   echo "✅ EXE found. Proceeding with installer..."
+          #   & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DVERSION=$VERSION installer.iss
+          #   #& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          # } else {
+          #   echo "❌ ERROR: MyFletApp_$VERSION.exe not found! Stopping build."
+          #   exit 1
+          # }
         shell: pwsh
 
       - name: Upload Windows Installer as Artifact
