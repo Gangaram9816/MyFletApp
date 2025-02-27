@@ -1,6 +1,6 @@
 [Setup]
 AppName=MyFletApp
-AppVersion={#VERSION}
+AppVersion={#VERSION} 
 AppPublisher=YourName
 AppPublisherURL=https://github.com/Gangaram9816/MyFletApp
 DefaultDirName={pf}\MyFletApp

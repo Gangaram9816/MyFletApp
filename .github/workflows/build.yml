@@ -124,7 +124,8 @@ jobs:
 
           if (Test-Path "build/MyFletApp_$VERSION.exe") {
             echo "✅ EXE found. Proceeding with installer..."
-            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DVERSION=$VERSION installer.iss
+            #& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           } else {
             echo "❌ ERROR: MyFletApp_$VERSION.exe not found! Stopping build."
             exit 1
