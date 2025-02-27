@@ -54,10 +54,21 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
           C:\flutter\bin\flutter doctor
+          echo "Checking current directory: $(pwd)"
+          ls  # ✅ Debugging: Show current directory contents
 
-          echo "✅ Running Flet build..."
+
+          echo "Moving to src directory..."
           cd src  # ✅ Move inside the "src" directory where `main.py` exists
+
+          echo "Running Flet Build..."
           flet build windows --module-name main --output ../build/ --verbose
+          
+          echo "Checking build directory contents..."
+          ls ../build/  # ✅ Debugging: Show build directory contents
+
+
+          # flet build windows --module-name main --output ../build/ --verbose
         shell: pwsh
 
       - name: Verify Build Output
@@ -110,7 +121,17 @@ jobs:
         shell: pwsh
 
       - name: Check Build Directory Before Running ISCC
-        run: ls build/
+        run: |
+          echo "Checking build directory..."
+          ls build/
+
+          if (Test-Path "build/src.exe") {
+            echo "✅ src.exe found. Proceeding with installer..."
+          } else {
+            echo "❌ ERROR: src.exe not found! Stopping build."
+            exit 1
+          }
+        
         shell: pwsh
 
       - name: Generate Windows Installer
