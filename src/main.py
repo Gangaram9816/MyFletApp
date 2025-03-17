@@ -83,7 +83,8 @@ def main(page: ft.Page):
 if __name__ == "__main__":
     if "CI" in os.environ:  # ✅ Skip UI in CI/CD mode
         print("✅ Running in CI/CD mode, exiting immediately.")
-        exit(0)  # ✅ Prevent blocking execution
+        exit(0) 
+         # ✅ Prevent blocking execution
     else:
         ft.app(target=main)
 
