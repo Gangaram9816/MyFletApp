@@ -1,4 +1,7 @@
+
+
 name: Build & Deploy Flet App
+
 
 on:
   push:
@@ -7,14 +10,17 @@ on:
     tags:
       - "v*"
 
+
 jobs:
   build:
     name: Build for Windows
     runs-on: windows-latest
 
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
 
       - name: Set UTF-8 Encoding (Fix Unicode Issue)
         run: |
@@ -24,6 +30,7 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         shell: pwsh
 
+
       - name: Install Flutter
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1 C:\flutter
@@ -32,13 +39,15 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
-          C:\flutter\bin\flutter precache
+          C:\flutter\bin\flutter precache  # ✅ Ensures Flutter dependencies are installed
         shell: pwsh
+
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
+
 
       - name: Install dependencies
         run: |
@@ -46,54 +55,26 @@ jobs:
           pip install -r src/requirements.txt
           pip install flet  # Ensure Flet CLI is installed
 
+
       - name: Build Windows Executable
         run: |
           chcp 65001  # ✅ Fix Unicode Issue
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
-          C:\flutter\bin\flutter doctor
-          echo "Checking current directory: $(pwd)"
-          ls  # ✅ Debugging: Show current directory contents
-
-
-          echo "Moving to src directory..."
-          cd src  # ✅ Move inside the "src" directory where `main.py` exists
-
-          echo "Running Flet Build..."
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
+          C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
+          cd src  # ✅ Move inside the "src" directory
           flet build windows --module-name main --output ../build/ --verbose
-          
-          echo "Checking build directory contents..."
-          ls ../build/  # ✅ Debugging: Show build directory contents
-
-
-          # flet build windows --module-name main --output ../build/ --verbose
+          # ✅ Build the Flet app into the "build" folder
+          # flet build windows --module-name src.main --output build/ --verbose
         shell: pwsh
 
-      - name: Verify Build Output
-        run: |
-          echo "Checking contents of the build directory after Flet build..."
-          ls -R build/
+
+      - name: Verify Build Directory
+        run: ls build/
         shell: pwsh
 
-      - name: Rename EXE for Versioning
-        run: |
-          if ($env:GITHUB_REF -match 'refs/tags/v(.+)') {
-            $VERSION=$matches[1]
-          } else {
-            $VERSION="main"
-          }
-          echo "Setting VERSION=$VERSION"
-
-          if (Test-Path "build/src.exe") {
-            echo "✅ src.exe found. Renaming to MyFletApp_$VERSION.exe..."
-            mv build/src.exe build/MyFletApp_$VERSION.exe
-          } else {
-            echo "❌ ERROR: src.exe not found! Stopping build."
-            exit 1
-          }
-        shell: pwsh
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -101,13 +82,16 @@ jobs:
           name: Flet_App_Windows
           path: build/
 
+
   installer:
     needs: build
     runs-on: windows-latest
 
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
@@ -115,52 +99,37 @@ jobs:
           name: Flet_App_Windows
           path: build/
 
+
+      # - name: Verify Build Files Before Running Installer
+      #   run: ls build/
+      #   shell: pwsh
+
+
       - name: Install Inno Setup
         run: |
           choco install innosetup -y
         shell: pwsh
 
-      - name: Check Build Directory Before Running ISCC
-        run: |
-          echo "Checking build directory..."
-          ls build/
 
-          if (Test-Path "build/src.exe") {
-            echo "✅ src.exe found. Proceeding with installer..."
-          } else {
-            echo "❌ ERROR: src.exe not found! Stopping build."
-            exit 1
-          }
-        
+      - name: Check Build Directory Before Running ISCC
+        run: ls build/
         shell: pwsh
+
 
       - name: Generate Windows Installer
         run: |
-          if ($env:GITHUB_REF -match 'refs/tags/v(.+)') {
-            $VERSION=$matches[1]
-          } else {
-            $VERSION="main"
-          }
-          echo "Setting VERSION=$VERSION"
-          cd $GITHUB_WORKSPACE
+
 
           if (Test-Path "build/src.exe") {
             echo "✅ src.exe found. Proceeding with installer..."
-            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "$GITHUB_WORKSPACE/installer.iss"
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
           } else {
             echo "❌ ERROR: src.exe not found! Stopping build."
             exit 1
           }
-
-          # if (Test-Path "build/MyFletApp_$VERSION.exe") {
-          #   echo "✅ EXE found. Proceeding with installer..."
-          #   & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DVERSION=$VERSION installer.iss
-          #   #& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
-          # } else {
-          #   echo "❌ ERROR: MyFletApp_$VERSION.exe not found! Stopping build."
-          #   exit 1
-          # }
+          # & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
+
 
       - name: Upload Windows Installer as Artifact
         uses: actions/upload-artifact@v4
@@ -168,20 +137,24 @@ jobs:
           name: Windows_Installer
           path: build/MyFletApp_Installer.exe
 
+
   release:
     needs: installer
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
 
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
 
       - name: Download Windows Installer
         uses: actions/download-artifact@v4
         with:
           name: Windows_Installer
           path: build/
+
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1

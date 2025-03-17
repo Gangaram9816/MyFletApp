@@ -1,34 +1,34 @@
 [Setup]
 AppName=MyFletApp
-AppVersion={#VERSION}
+AppVersion=1.0.0
 AppPublisher=YourName
 AppPublisherURL=https://github.com/Gangaram9816/MyFletApp
 DefaultDirName={pf}\MyFletApp
 DefaultGroupName=MyFletApp
-UninstallDisplayIcon={app}\MyFletApp_{#VERSION}.exe
+UninstallDisplayIcon={app}\src.exe
 Compression=lzma
 SolidCompression=yes
-OutputDir={#SourcePath}\build
-OutputBaseFilename=MyFletApp_Installer
-SetupIconFile={#SourcePath}\build\app.ico
+OutputDir=build  
+OutputBaseFilename=MyFletApp_Installer  
 ArchitecturesInstallIn64BitMode=x64
-DisableDirPage=no
+DisableDirPage=no  
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "{#SourcePath}\build\src.exe"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
+Source: "build\src.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "build\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{group}\MyFletApp"; Filename: "{app}\MyFletApp_{#VERSION}.exe"; IconFilename: "{app}\app.ico"
-Name: "{commondesktop}\MyFletApp"; Filename: "{app}\MyFletApp_{#VERSION}.exe"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
+Name: "{group}\MyFletApp"; Filename: "{app}\src.exe"
+Name: "{commondesktop}\MyFletApp"; Filename: "{app}\src.exe"; Tasks: desktopicon
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Additional tasks:"
 
 [Run]
-Filename: "{app}\MyFletApp_{#VERSION}.exe"; Description: "Launch MyFletApp"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\src.exe"; Description: "Launch MyFletApp"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
