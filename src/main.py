@@ -64,7 +64,7 @@ def main(page: ft.Page):
     user_input = ft.TextField(label="Enter something")
     
     # Display text
-    display_text = ft.Text("", size=20)
+    display_text = ft.Text("", size=25,color="blue")
     
     # Function to update text on button click
     def on_click(e):
