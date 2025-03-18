@@ -135,4 +135,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: build/MyFletApp_Installer.exe
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
