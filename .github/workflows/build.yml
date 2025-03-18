@@ -1,26 +1,28 @@
-
-
 name: Build & Deploy Flet App
-
 
 on:
   push:
     branches:
-      - main
+      - main  # Trigger on any push to the main branch
     tags:
-      - "v*"
+      - '*'  # Trigger on any tag
 
+  # Optionally, you can add manual trigger for workflow
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release'
+        required: true
+        default: 'v1.0.0'
 
 jobs:
   build:
     name: Build for Windows
     runs-on: windows-latest
 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
 
       - name: Set UTF-8 Encoding (Fix Unicode Issue)
         run: |
@@ -30,7 +32,6 @@ jobs:
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
         shell: pwsh
 
-
       - name: Install Flutter
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1 C:\flutter
@@ -39,42 +40,35 @@ jobs:
           $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
           C:\flutter\bin\flutter doctor
           C:\flutter\bin\flutter config --no-analytics
-          C:\flutter\bin\flutter precache  # ✅ Ensures Flutter dependencies are installed
+          C:\flutter\bin\flutter precache
         shell: pwsh
-
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
 
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r src/requirements.txt
-          pip install flet  # Ensure Flet CLI is installed
-
-
+          pip install flet
+          
       - name: Build Windows Executable
         run: |
-          chcp 65001  # ✅ Fix Unicode Issue
+          chcp 65001
           $env:PYTHONIOENCODING="utf-8"
           $env:PYTHONUTF8=1
           [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"  # ✅ Ensure Flutter is in PATH
-          C:\flutter\bin\flutter doctor  # ✅ Verify Flutter is installed before building
-          cd src  # ✅ Move inside the "src" directory
+          $env:Path += ";C:\flutter\bin;C:\flutter\bin\cache\dart-sdk\bin"
+          C:\flutter\bin\flutter doctor
+          cd src
           flet build windows --module-name main --output ../build/ --verbose
-          # ✅ Build the Flet app into the "build" folder
-          # flet build windows --module-name src.main --output build/ --verbose
         shell: pwsh
-
 
       - name: Verify Build Directory
         run: ls build/
         shell: pwsh
-
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -82,16 +76,13 @@ jobs:
           name: Flet_App_Windows
           path: build/
 
-
   installer:
     needs: build
     runs-on: windows-latest
 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
 
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
@@ -99,27 +90,17 @@ jobs:
           name: Flet_App_Windows
           path: build/
 
-
-      # - name: Verify Build Files Before Running Installer
-      #   run: ls build/
-      #   shell: pwsh
-
-
       - name: Install Inno Setup
         run: |
           choco install innosetup -y
         shell: pwsh
 
-
       - name: Check Build Directory Before Running ISCC
         run: ls build/
         shell: pwsh
 
-
       - name: Generate Windows Installer
         run: |
-
-
           if (Test-Path "build/src.exe") {
             echo "✅ src.exe found. Proceeding with installer..."
             & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
@@ -127,9 +108,7 @@ jobs:
             echo "❌ ERROR: src.exe not found! Stopping build."
             exit 1
           }
-          # & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
         shell: pwsh
-
 
       - name: Upload Windows Installer as Artifact
         uses: actions/upload-artifact@v4
@@ -137,24 +116,20 @@ jobs:
           name: Windows_Installer
           path: build/MyFletApp_Installer.exe
 
-
   release:
     needs: installer
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-
+    if: github.ref == 'refs/heads/main'  # Trigger on push to the main branch or a new tag is created
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
 
       - name: Download Windows Installer
         uses: actions/download-artifact@v4
         with:
           name: Windows_Installer
           path: build/
-
 
       - name: Upload to GitHub Releases
         uses: softprops/action-gh-release@v1
